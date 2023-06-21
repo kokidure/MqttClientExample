@@ -1,38 +1,65 @@
 package org.mqtt;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+import org.eclipse.paho.client.mqttv3.MqttClient;
+import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-/**
- * Unit test for simple App.
- */
+import java.util.UUID;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+
 public class BodyTemperatureSensorTest
-    extends TestCase
 {
-    /**
-     * Create the test case
-     *
-     * @param testName name of the test case
-     */
-    public BodyTemperatureSensorTest(String testName )
+    private static Logger log = LoggerFactory.getLogger(BodyTemperatureSensorTest.class);
+
+    @Test
+    public void sendSingleMessage() throws Exception
     {
-        super( testName );
+        String publisherId = UUID.randomUUID().toString();
+        MqttClient publisher = new MqttClient("tcp://iot.eclipse.org:1883",publisherId);
+
+        String subscriberId = UUID.randomUUID().toString();
+        MqttClient subscriber = new MqttClient("tcp://iot.eclipse.org:1883",subscriberId);
+
+        MqttConnectOptions options = new MqttConnectOptions();
+        options.setAutomaticReconnect(true);
+        options.setCleanSession(true);
+        options.setConnectionTimeout(10);
+
+
+        subscriber.connect(options);
+        publisher.connect(options);
+
+        CountDownLatch receivedSignal = new CountDownLatch(1);
+
+        subscriber.subscribe(BodyTemperatureSensor.TOPIC, (topic, msg) -> {
+            byte[] payload = msg.getPayload();
+            log.info("Message received: topic={}, payload={}", topic, new String(payload));
+            receivedSignal.countDown();
+        });
+
+        Callable<Void> target = new BodyTemperatureSensor(publisher);
+        target.call();
+
+        receivedSignal.await(1, TimeUnit.MINUTES);
+
+        log.info("Success !");
     }
 
-    /**
-     * @return the suite of tests being tested
-     */
-    public static Test suite()
-    {
-        return new TestSuite( BodyTemperatureSensorTest.class );
-    }
+    @Test
+    public void sendMultipleMessages() throws Exception {
+        String publisherId = UUID.randomUUID().toString();
+        MqttClient publisher = new MqttClient("tcp://iot.eclipse.org:1883",publisherId);
 
-    /**
-     * Rigourous Test :-)
-     */
-    public void testApp()
-    {
-        assertTrue( true );
+        String subscriberId = UUID.randomUUID().toString();
+        MqttClient subscriber = new MqttClient("tcp://iot.eclipse.org:1883",subscriberId);
+
+        MqttConnectOptions options = new MqttConnectOptions();
+        options.setAutomaticReconnect(true);
+        options.setCleanSession(true);
+        options.setConnectionTimeout(10);
     }
 }
