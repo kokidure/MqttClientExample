@@ -19,10 +19,10 @@ public class BodyTemperatureSensorTest
     public void sendSingleMessage() throws Exception
     {
         String publisherId = UUID.randomUUID().toString();
-        MqttClient publisher = new MqttClient("tcp://iot.eclipse.org:1883",publisherId);
+        MqttClient publisher = new MqttClient("tcp://test.mosquitto.org:1883",publisherId);
 
         String subscriberId = UUID.randomUUID().toString();
-        MqttClient subscriber = new MqttClient("tcp://iot.eclipse.org:1883",subscriberId);
+        MqttClient subscriber = new MqttClient("tcp://test.mosquitto.org:1883",subscriberId);
 
         MqttConnectOptions options = new MqttConnectOptions();
         options.setAutomaticReconnect(true);
@@ -52,10 +52,10 @@ public class BodyTemperatureSensorTest
     @Test
     public void sendMultipleMessages() throws Exception {
         String publisherId = UUID.randomUUID().toString();
-        MqttClient publisher = new MqttClient("tcp://iot.eclipse.org:1883",publisherId);
+        MqttClient publisher = new MqttClient("tcp://test.mosquitto.org:1883",publisherId);
 
         String subscriberId = UUID.randomUUID().toString();
-        MqttClient subscriber = new MqttClient("tcp://iot.eclipse.org:1883",subscriberId);
+        MqttClient subscriber = new MqttClient("tcp://test.mosquitto.org:1883",subscriberId);
 
         MqttConnectOptions options = new MqttConnectOptions();
         options.setAutomaticReconnect(true);
